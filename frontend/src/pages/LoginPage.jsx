@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { useAuth } from '../context/AuthContext'
 function LoginPage() {
     // return <h1>LOGIN PAGE</h1>
     const navigate = useNavigate()
@@ -8,23 +9,17 @@ function LoginPage() {
     const [password,setPassword] = useState('')
     const [error,setError] = useState('')
     const [loading,setLoading] = useState(false)
+    const { login } = useAuth()
     const handleLogin = async () => {
         setLoading(true)
         setError('')
         try {
-            const response = await api.post('/auth/login/', {
-                username,
-                password
-            })
-            const token = response.data.access
-            const refresh = response.data.refresh
-            localStorage.setItem('access_token', token)
-            localStorage.setItem('refresh_token', refresh)
-            navigate('/analyze')
+        await login(username, password)
+        navigate('/analyze')
         } catch (err) {
-            setError('ERROR: ' + err.message)
+        setError('Invalid username or password')
         } finally {
-            setLoading(false)
+        setLoading(false)
         }
     }
 
