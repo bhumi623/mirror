@@ -22,6 +22,7 @@
 //   )
 // }
 // export default App
+import Navbar from './components/Navbar'
 import { Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage' 
 import RegisterPage from './pages/RegisterPage' 
@@ -29,15 +30,22 @@ import AnalyzePage from './pages/AnalyzePage'
 import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element = {<LoginPage/>}/>
-      <Route path="/register" element = {<RegisterPage/>}/>    
-      <Route path="/analyze" element={
-        <ProtectedRoute>
-          <AnalyzePage/>
-        </ProtectedRoute>
-        }/>
-    </Routes>
+    <div className="bg-mirror-bg min-h-screen">
+      <Navbar />
+      <Routes>
+        <Route path="/login" element = {<LoginPage/>}/>
+        <Route path="/register" element = {<RegisterPage/>}/>    
+        <Route path="/analyze" element={
+          <ProtectedRoute>
+            <AnalyzePage/>
+          </ProtectedRoute>
+          }/>
+      </Routes>
+    </div>
+    // <div className="bg-mirror-bg min-h-screen p-8">
+    //   <h1 className="text-3xl font-bold text-mirror-text">Mirror</h1>
+    //   <p className="text-mirror-subtext">Know Yourself. Challenge Yourself</p>
+    // </div>
   )
 }
 export default App
