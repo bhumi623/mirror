@@ -31,12 +31,13 @@ import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   return (
     <div className="bg-mirror-bg min-h-screen">
-      <Navbar />
+      
       <Routes>
         <Route path="/login" element = {<LoginPage/>}/>
         <Route path="/register" element = {<RegisterPage/>}/>    
         <Route path="/analyze" element={
           <ProtectedRoute>
+            <Navbar />
             <AnalyzePage/>
           </ProtectedRoute>
           }/>
