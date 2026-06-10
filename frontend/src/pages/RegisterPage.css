@@ -1,0 +1,138 @@
+/* RegisterPage.css */
+.reg-root {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+.reg-left {
+  background-color: var(--m-bg);
+  border-right: 1px solid rgba(26, 16, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 40px 48px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.reg-logo {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--m-text);
+  cursor: pointer;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.reg-brand {
+  flex-shrink: 0;
+  padding-top: 40px;
+  padding-bottom: 24px;
+}
+
+.reg-brand-body {
+  margin-top: 12px;
+  max-width: 320px;
+}
+
+.reg-mascot-area {
+  flex: 1;                    
+  position: relative;
+  min-height: 200px;          
+  width: 100%;
+}
+
+.reg-tagline {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--m-sub);
+  opacity: 0.5;
+  flex-shrink: 0;
+  padding-top: 16px;
+}
+
+.reg-right {
+  background-color: var(--m-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 40px;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+.reg-form-wrap {
+  width: 100%;
+  max-width: 360px;
+}
+
+.reg-form-title {
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  color: var(--m-text);
+  margin-bottom: 6px;
+}
+
+@media (max-width: 900px) {
+  .reg-brand-body {
+    display: none;
+  }
+  .reg-left {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 720px) {
+  .reg-brand {
+    display: none;
+  }
+  .reg-left {
+    padding: 24px 20px;
+  }
+  .reg-right {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 580px) {
+  .reg-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .reg-left {
+    min-height: unset;
+    height: 280px;            
+    padding: 20px 24px 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(26, 16, 0, 0.08);
+  }
+
+  .reg-logo {
+    font-size: 22px;
+  }
+
+  .reg-tagline {
+    display: none;            
+  }
+
+  .reg-mascot-area {
+    min-height: 160px;
+  }
+
+  .reg-right {
+    min-height: unset;
+    padding: 32px 24px 48px;
+  }
+
+  .reg-form-wrap {
+    max-width: 100%;
+  }
+}

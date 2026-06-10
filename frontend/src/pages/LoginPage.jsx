@@ -1,244 +1,162 @@
-import { useState } from 'react'
+/* LoginPage.jsx */
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import GoogleAuthButton from '../components/GoogleAuthButton'
+import Mascot from '../components/Mascot'
+import './RegisterPage.css'
 
 function LoginPage() {
-  const [username, setUsername] = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-  const { login } = useAuth()
+  const [error,    setError]    = useState('')
+  const [loading,  setLoading]  = useState(false)
+
+  const [expression,      setExpression]      = useState('default')
+  const [passwordFocused, setPasswordFocused] = useState(false)
+  const resetTimer = useRef(null)
+  const navigate   = useNavigate()
+  const { login, googleLogin } = useAuth()
+
+  const triggerExpr = (expr, ms = 2000) => {
+    clearTimeout(resetTimer.current)
+    setExpression(expr)
+    resetTimer.current = setTimeout(() => setExpression('default'), ms)
+  }
+
+  const onPasswordFocus = () => {
+    setPasswordFocused(true)
+    if (expression === 'default') setExpression('closed')
+  }
+  const onPasswordBlur = () => {
+    setPasswordFocused(false)
+    if (expression === 'closed' || expression === 'peek') setExpression('default')
+  }
+  const onPasswordKey = (e) => {
+    const caps = e.getModifierState('CapsLock')
+    if (caps && (expression === 'closed' || expression === 'default')) {
+      setExpression('peek')
+    } else if (!caps && expression === 'peek') {
+      setExpression(document.activeElement === e.target ? 'closed' : 'default')
+    }
+  }
+
+  const onThinkFocus = () => { if (expression === 'default') setExpression('think') }
+  const onThinkBlur  = () => { if (expression === 'think')   setExpression('default') }
 
   const handleLogin = async () => {
     setLoading(true)
     setError('')
+    triggerExpr('think', 8000)
     try {
-      await login(username, password)
-      navigate('/analyze')
+      await login(email, password)
+      triggerExpr('dizzy', 1200)
+      setTimeout(() => navigate('/analyze'), 1200)
     } catch (err) {
-      setError('Invalid username or password')
+      setError('Invalid email or password.')
+      triggerExpr('angry', 2500)
     } finally {
       setLoading(false)
     }
   }
 
+  const handleGoogleSuccess = async (tokenData) => {
+    try {
+      await googleLogin(tokenData)
+      navigate('/analyze')
+    } catch (err) {
+      setError('Google login failed. Please try again.')
+    }
+  }
+
+  const handleGoogleError = (message) => {
+    setError(message)
+  }
+
+  useEffect(() => () => clearTimeout(resetTimer.current), [])
+
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2"
-    style={{fontFamily: 'var(--font-sans)', background: '#F5F0E8'}}>
+    <div className="reg-root">
 
-      {/* Left — Brand side */}
-      <div style={{
-        padding: '52px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between'
-      }}>
-        <div style={{
-          fontSize: '16px',
-          fontWeight: '700',
-          letterSpacing: '2px',
-          color: '#1a1000',
-          textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}
-          onClick={() => navigate('/')}
-        >
-          Mirror
+      <div className="reg-left">
+        <div className="reg-logo" onClick={() => navigate('/')}>Mirror</div>
+
+        <div className="reg-brand">
+          <div className="m-line" />
+          <h1 className="m-heading">WELCOME<br />BACK.</h1>
         </div>
 
-        <div>
-          <div style={{
-            width: '36px',
-            height: '3px',
-            background: '#D4AF37',
-            marginBottom: '20px'
-          }} />
-          <div style={{
-            fontSize: 'clamp(36px, 5vw, 64px)',
-            fontWeight: '900',
-            color: '#1a1000',
-            lineHeight: '0.9',
-            letterSpacing: '-2px'
-          }}>
-            WELCOME<br />BACK.
-          </div>
-          <div style={{
-            fontSize: '18px',
-            fontWeight: '300',
-            color: '#5a4a2a',
-            fontStyle: 'italic',
-            marginTop: '12px'
-          }}>
+        <div className="reg-mascot-area">
+          <Mascot expression={expression} passwordFocused={passwordFocused} />
+        </div>
+
+        <p className="reg-tagline">KNOW YOURSELF · CHALLENGE YOURSELF</p>
+      </div>
+      <div className="reg-right">
+        <div className="reg-form-wrap">
+
+          <h2 className="reg-form-title">Welcome back.</h2>
+          <p className="m-body" style={{ marginBottom: 32 }}>
             Your mirror is waiting.
+          </p>
+
+          <div className="m-form-group">
+            <label className="m-label" htmlFor="log-email">Email</label>
+            <input
+              id="log-email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              onFocus={onThinkFocus}
+              onBlur={onThinkBlur}
+            />
           </div>
-          <p style={{
-            fontSize: '13px',
-            color: '#8B7355',
-            lineHeight: '1.7',
-            marginTop: '20px',
-            maxWidth: '280px'
-          }}>
-            Every word you write tells a story about who you are. Let's read it together.
-          </p>
-        </div>
 
-        <div style={{
-          fontSize: '11px',
-          color: '#8B7355',
-          letterSpacing: '1px'
-        }}>
-          KNOW YOURSELF · CHALLENGE YOURSELF
-        </div>
-      </div>
+          <div className="m-form-group">
+            <label className="m-label" htmlFor="log-password">Password</label>
+            <input
+              id="log-password"
+              type="password"
+              placeholder="Your password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              onFocus={onPasswordFocus}
+              onBlur={onPasswordBlur}
+              onKeyUp={onPasswordKey}
+            />
+          </div>
 
-      {/* Right — Form side */}
-      <div style={{
-        background: 'white',
-        padding: '52px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        gap: '24px'
-      }}>
+          {error && <p className="m-error-text" style={{ marginBottom: 12 }}>{error}</p>}
 
-        <div>
-          <label style={{
-            fontSize: '10px',
-            fontWeight: '700',
-            color: '#8B7355',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            display: 'block',
-            marginBottom: '8px'
-          }}>
-            Username
-          </label>
-          <input
-            type="text"
-            placeholder=""
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{
-              width: '100%',
-              boxSizing: 'border-box',
-              padding: '14px 0',
-              border: 'none',
-              borderBottom: '2px solid #1a1000',
-              background: 'transparent',
-              fontSize: '15px',
-              color: '#1a1000',
-              outline: 'none'
-            }}
-          />
-        </div>
-
-        <div>
-          <label style={{
-            fontSize: '10px',
-            fontWeight: '700',
-            color: '#8B7355',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            display: 'block',
-            marginBottom: '8px'
-          }}>
-            Password
-          </label>
-          <input
-            type="password"
-            placeholder=""
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              width: '100%',
-              boxSizing: 'border-box',
-              padding: '14px 0',
-              border: 'none',
-              borderBottom: '2px solid #1a1000',
-              background: 'transparent',
-              fontSize: '15px',
-              color: '#1a1000',
-              outline: 'none'
-            }}
-          />
-        </div>
-
-        {error && (
-          <p style={{
-            fontSize: '12px',
-            color: '#c0392b',
-            margin: '0'
-          }}>
-            {error}
-          </p>
-        )}
-
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          style={{
-            background: '#D4AF37',
-            color: '#1a1000',
-            padding: '16px',
-            border: 'none',
-            fontSize: '12px',
-            fontWeight: '700',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            cursor: 'pointer',
-            marginTop: '8px',
-            opacity: loading ? 0.7 : 1
-          }}
-        >
-          {loading ? 'Opening your mirror...' : 'Show Me My Mirror →'}
-        </button>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <div style={{flex: 1, height: '1px', background: '#e8e0d0'}} />
-          <span style={{fontSize: '11px', color: '#8B7355'}}>or</span>
-          <div style={{flex: 1, height: '1px', background: '#e8e0d0'}} />
-        </div>
-
-        <button style={{
-          background: 'transparent',
-          color: '#1a1000',
-          padding: '14px',
-          border: '1.5px solid #1a1000',
-          fontSize: '12px',
-          fontWeight: '700',
-          letterSpacing: '2px',
-          textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}>
-          Continue with Google
-        </button>
-
-        <p style={{
-          fontSize: '12px',
-          color: '#8B7355',
-          textAlign: 'center',
-          margin: '0'
-        }}>
-          New here?{' '}
-          <span
-            onClick={() => navigate('/register')}
-            style={{
-              color: '#9B72CF',
-              fontWeight: '700',
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
+          <button
+            className="btn-primary btn-full"
+            onClick={handleLogin}
+            disabled={loading}
+            style={{ marginBottom: 16, opacity: loading ? 0.7 : 1 }}
           >
-            Create your account
-          </span>
-        </p>
+            {loading ? 'Opening your mirror...' : 'Show Me My Mirror →'}
+          </button>
 
+          <div className="m-divider">or</div>
+
+          <GoogleAuthButton
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+
+          <p className="m-body" style={{ textAlign: 'center', marginTop: 24 }}>
+            New here?{' '}
+            <a href="/register" onClick={e => { e.preventDefault(); navigate('/register') }}>
+              Create your account
+            </a>
+          </p>
+
+        </div>
       </div>
+
     </div>
   )
 }

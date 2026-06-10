@@ -1,0 +1,9 @@
+fastapi==0.115.0
+uvicorn==0.30.6
+python-decouple==3.8
+vaderSentiment==3.3.2
+langdetect==1.0.9
+google-generativeai==0.7.2
+httpx==0.27.0
+pydantic==2.8.0
+groq==0.9.0

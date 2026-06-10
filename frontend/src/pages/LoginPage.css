@@ -1,0 +1,132 @@
+/* LoginPage.css */
+
+.log-root {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+.log-left {
+  background-color: var(--m-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 40px;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+.log-form-wrap {
+  width: 100%;
+  max-width: 360px;
+}
+
+.log-form-title {
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  color: var(--m-text);
+  margin-bottom: 6px;
+}
+
+.log-right {
+  background-color: var(--m-bg);
+  border-left: 1px solid rgba(26, 16, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 40px 48px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.log-logo {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--m-text);
+  cursor: pointer;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.log-brand {
+  flex-shrink: 0;
+  padding-top: 40px;
+  padding-bottom: 24px;
+}
+
+.log-mascot-area {
+  flex: 1;
+  position: relative;
+  min-height: 200px;
+  width: 100%;
+}
+
+.log-tagline {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--m-sub);
+  opacity: 0.5;
+  flex-shrink: 0;
+  padding-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .log-right {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 720px) {
+  .log-brand {
+    display: none;
+  }
+  .log-right {
+    padding: 24px 20px;
+  }
+  .log-left {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 580px) {
+  .log-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .log-right {
+    order: -1;
+    min-height: unset;
+    height: 280px;
+    padding: 20px 24px 0;
+    border-left: none;
+    border-bottom: 1px solid rgba(26, 16, 0, 0.08);
+  }
+
+  .log-logo {
+    font-size: 22px;
+  }
+
+  .log-tagline {
+    display: none;
+  }
+
+  .log-mascot-area {
+    min-height: 160px;
+  }
+
+  .log-left {
+    min-height: unset;
+    padding: 32px 24px 48px;
+  }
+
+  .log-form-wrap {
+    max-width: 100%;
+  }
+}

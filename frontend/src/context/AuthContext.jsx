@@ -33,15 +33,22 @@ export function AuthProvider({ children }) {
     const userResponse = await api.get('/auth/me/')
     setUser(userResponse.data)
   }
+  const googleLogin = async (tokenData) => {
+    localStorage.setItem('access_token', tokenData.access)
+    localStorage.setItem('refresh_token', tokenData.refresh)
+    const userResponse = await api.get('/auth/me/')
+    setUser(userResponse.data)
+  }
 
   const logout = () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     setUser(null)
   }
-
+ 
+  
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, googleLogin, logout }}>
       {children}
     </AuthContext.Provider>
   )

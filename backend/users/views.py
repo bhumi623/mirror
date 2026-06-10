@@ -4,6 +4,9 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import RegisterSerializer
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 # Create your views here.
 @api_view(['POST'])
 def register_view(request):
@@ -30,3 +33,7 @@ def profile_view(request):
         'is_public': user.is_public,
         'bio': user.bio,
     })
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = 'postmessage'
+    client_class = OAuth2Client
