@@ -20,6 +20,7 @@ def score_debate(debate) -> None:
             )
             response.raise_for_status()
             scores = response.json()
+            print(f"[scoring.py] Got scores: {scores}")
 
     except httpx.TimeoutException:
         print(f"[scoring.py] ML service timed out for debate {debate.id}")

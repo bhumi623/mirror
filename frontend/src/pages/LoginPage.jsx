@@ -51,7 +51,7 @@ function LoginPage() {
     try {
       await login(email, password)
       triggerExpr('dizzy', 1200)
-      setTimeout(() => navigate('/analyze'), 1200)
+      setTimeout(() => navigate('/'), 1200)
     } catch (err) {
       setError('Invalid email or password.')
       triggerExpr('angry', 2500)
@@ -63,7 +63,7 @@ function LoginPage() {
   const handleGoogleSuccess = async (tokenData) => {
     try {
       await googleLogin(tokenData)
-      navigate('/analyze')
+      navigate('/')
     } catch (err) {
       setError('Google login failed. Please try again.')
     }

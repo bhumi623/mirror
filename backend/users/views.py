@@ -26,6 +26,7 @@ def register_view(request):
 def profile_view(request):
     user = request.user
     return Response({
+        'id': user.id,
         'username': user.username,
         'email': user.email,
         'name': user.name,

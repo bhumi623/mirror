@@ -1,18 +1,22 @@
 # ml_service/main.py
 
 from fastapi import FastAPI, HTTPException
-from models import AnalyzeRequest, AnalyzeResponse
+from models import AnalyzeRequest, AnalyzeResponse, DebateAnalyzeRequest, DebateAnalyzeResponse
 from analyzers.language import detect_language
 from analyzers.mood import analyze_mood
 from analyzers.word_power import analyze_word_power
 from analyzers.patterns import analyze_patterns
 from analyzers.gemini import generate_labels
+from analyzers.debate import analyze_debate
 
-app = FastAPI(title="Mirror ML Service", version="1.0.0")
+app = FastAPI(title="Mirror ML Service", version="2.0.0")
+
 
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "mirror-ml"}
+
+
 
 @app.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(request: AnalyzeRequest):
@@ -45,3 +49,15 @@ async def analyze(request: AnalyzeRequest):
         mode=request.mode,
         **labeled
     )
+
+@app.post("/analyze-debate", response_model=DebateAnalyzeResponse)
+async def analyze_debate_endpoint(request: DebateAnalyzeRequest):
+
+    if len(request.messages) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="Minimum 2 messages required to score a debate."
+        )
+
+    scores = await analyze_debate(request.topic, request.messages)
+    return DebateAnalyzeResponse(**scores)

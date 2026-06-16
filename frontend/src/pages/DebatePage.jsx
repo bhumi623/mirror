@@ -18,8 +18,9 @@ function DebatePage() {
   const { id }     = useParams()
   const { user, loading: authLoading } = useAuth()
   const navigate   = useNavigate()
-  const [ending, setEnding] = useState(false)
-  const [endError, setEndError] = useState('')
+  const [ending,      setEnding]      = useState(false)
+  const [endError,    setEndError]    = useState('')
+  const [finalDebate, setFinalDebate] = useState(null)
 
   const userId = authLoading ? null : user?.id
 
@@ -34,12 +35,28 @@ function DebatePage() {
     setEnding(true)
     setEndError('')
     try {
-      await api.post(`/debate/${id}/end/`)
+      const res = await api.post(`/debate/${id}/end/`)
+      setFinalDebate(res.data)
     } catch (err) {
       setEndError(err.response?.data?.error || 'Could not end debate.')
       setEnding(false)
     }
   }
+  useEffect(() => {
+    if (debate?.status === 'ended' && debate?.challenger_argument_strength === null && !finalDebate) {
+      api.get(`/debate/${id}/`)
+        .then(res => {
+          if (res.data.challenger_argument_strength === null) {
+            setTimeout(() => {
+              api.get(`/debate/${id}/`).then(res2 => setFinalDebate(res2.data))
+            }, 2000)
+          } else {
+            setFinalDebate(res.data)
+          }
+        })
+        .catch(err => console.error('Could not load scored debate:', err))
+    }
+  }, [debate?.status, debate?.challenger_argument_strength, finalDebate, id])
 
   if (authLoading) {
     return <LoadingScreen message="Loading..." />
@@ -56,6 +73,7 @@ function DebatePage() {
   if (!debate) {
     return <LoadingScreen message="Loading debate..." />
   }
+
   if (debate.status === 'waiting') {
     return <WaitingStage debate={debate} user={user} />
   }
@@ -64,8 +82,14 @@ function DebatePage() {
     return <ThinkingStage debate={debate} user={user} secondsLeft={thinkingSecondsLeft} />
   }
 
-  if (debate.status === 'ended') {
-    return <ScorecardStage debate={debate} userId={user?.id} onNewDebate={() => navigate('/debate/new')} />
+  if (debate.status === 'ended' || finalDebate) {
+    return (
+      <ScorecardStage
+        debate={finalDebate || debate}
+        userId={user?.id}
+        onNewDebate={() => navigate('/debate/new')}
+      />
+    )
   }
 
   return (
@@ -86,6 +110,7 @@ function DebatePage() {
     />
   )
 }
+
 function WaitingStage({ debate, user }) {
   const inviteLink = `${window.location.origin}/debate/${debate.id}`
   const [copied, setCopied] = useState(false)
@@ -101,7 +126,7 @@ function WaitingStage({ debate, user }) {
       <div style={styles.container}>
         <div style={styles.goldLine} />
         <h1 style={styles.heading}>WAITING FOR<br />OPPONENT.</h1>
-        <p style={styles.sub}>Share this link with <strong>{debate.opponent?.username || 'your opponent'}</strong></p>
+        <p style={styles.sub}>Share this link with <strong>{debate.opponent?.name || debate.opponent?.username || 'your opponent'}</strong></p>
 
         <div style={{ marginTop: '32px', padding: '20px 24px', background: 'white', display: 'flex', gap: '12px', alignItems: 'center' }}>
           <span style={{ fontSize: '13px', color: '#8B7355', flex: 1, wordBreak: 'break-all' }}>{inviteLink}</span>
@@ -152,7 +177,9 @@ function ThinkingStage({ debate, user, secondsLeft }) {
 
         <p style={{ marginTop: '24px', fontSize: '13px', color: '#8B7355' }}>
           You are debating <strong style={{ color: '#1a1000' }}>
-            {user?.id === debate.challenger?.id ? debate.opponent?.username : debate.challenger?.username}
+            {user?.id === debate.challenger?.id
+              ? (debate.opponent?.name || debate.opponent?.username)
+              : (debate.challenger?.name || debate.challenger?.username)}
           </strong>
         </p>
       </div>
@@ -275,7 +302,7 @@ function ArenaStage({
           <div ref={bottomRef} />
         </div>
 
-        {/* ── Input area ── */}
+        {/* Input area */}
         <div style={styles.inputArea}>
           {endError && <p style={{ fontSize: '12px', color: '#c0392b', margin: '0 0 8px' }}>{endError}</p>}
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
@@ -335,7 +362,6 @@ function ArenaStage({
     </div>
   )
 }
-
 
 function ScorecardStage({ debate, userId, onNewDebate }) {
   const isChallenger = userId === debate.challenger?.id
@@ -528,7 +554,7 @@ export function ChallengePage() {
     </div>
   )
 }
-
+//STYLES
 const styles = {
   page: {
     background: '#F5F0E8',

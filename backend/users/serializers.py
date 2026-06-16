@@ -9,7 +9,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'password', 'name', 'preferred_language']
+        fields = ['id', 'email', 'password', 'name', 'preferred_language']
         extra_kwargs = {
             'name': {'required': False},
             'preferred_language': {'required': False},

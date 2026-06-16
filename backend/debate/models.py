@@ -35,6 +35,7 @@ class Debate(models.Model):
     opponent_time_remaining   = models.FloatField(null=True, blank=True)
     turn_started_at  = models.DateTimeField(null=True, blank=True)
     current_turn_user_id = models.IntegerField(null=True, blank=True)
+    final_turn_user_id = models.IntegerField(null=True, blank=True)
     debate_started_at = models.DateTimeField(null=True, blank=True)
     ended_at          = models.DateTimeField(null=True, blank=True)
     messages = models.JSONField(default=list)

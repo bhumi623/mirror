@@ -2,6 +2,7 @@
 
 import Navbar from './components/Navbar'
 import { Routes, Route } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AnalyzePage from './pages/AnalyzePage'
@@ -12,7 +13,8 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/login"    element={<LoginPage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
         <Route path="/analyze" element={

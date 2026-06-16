@@ -13,10 +13,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -26,7 +27,12 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'mirror-1-dkmh.onrender.com',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://mirror-1-dkmh.onrender.com'
+]
 
 
 # Application definition
@@ -79,8 +85,11 @@ MIDDLEWARE = [
 ]
 CORS_ALLOWED_ORIGINS=[
     'http://localhost:5173',
+    'https://mirror-delta-vert.vercel.app',
 ]
-
+CORS_ALLOWED_ORIGIN_REGEX_WHITELIST = [
+    r"^https://.*\.vercel\.app$",
+]
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
