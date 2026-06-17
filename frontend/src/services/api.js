@@ -6,7 +6,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 })
 
-const publicEndpoints = ['/auth/login/', '/auth/register/', '/auth/token/refresh/']
+const publicEndpoints = ['/auth/login/', '/auth/register/', '/auth/refresh/']
 api.interceptors.request.use((config) => {
   const isPublic = publicEndpoints.some(endpoint => config.url.includes(endpoint))
   if (!isPublic) {
