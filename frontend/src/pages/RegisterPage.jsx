@@ -72,7 +72,7 @@ function RegisterPage() {
   const handleGoogleSuccess = async (tokenData) => {
     try {
       await googleLogin(tokenData)
-      navigate('/analyze')
+      navigate('/')
     } catch (err) {
       setError('Google login failed. Please try again.')
     }

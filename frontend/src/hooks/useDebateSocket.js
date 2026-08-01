@@ -1,150 +1,54 @@
 // frontend/src/hooks/useDebateSocket.js
 import { useEffect, useRef, useState, useCallback } from 'react'
-const WS_BASE = 'ws://localhost:8000'
+import api from '../services/api'
 
-const getFreshToken = async () => {
-  let token = localStorage.getItem('access_token')
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    const expiresAt = payload.exp * 1000
-    const fiveMinutes = 5 * 60 * 1000
-    if (Date.now() > expiresAt - fiveMinutes) {
-      const refresh = localStorage.getItem('refresh_token')
-      const res = await fetch('http://localhost:8000/api/auth/token/refresh/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh }),
-      })
-      const data = await res.json()
-      if (data.access) {
-        localStorage.setItem('access_token', data.access)
-        token = data.access
-      }
-    }
-  } catch (e) {
-    console.error('Token refresh failed', e)
-  }
-  return token
-}
+const POLL_INTERVAL = 3000 // ms
 
+// Manages polling and interactive actions for a live debate session.
 export function useDebateSocket(debateId, userId) {
-  const socketRef = useRef(null)
-
-  const [debate,       setDebate]      = useState(null)
-  const [messages,     setMessages]    = useState([])
-  const [connected,    setConnected]   = useState(false)
-  const [error,        setError]       = useState('')
-
-  const [challengerTime, setChallengerTime] = useState(null)
-  const [opponentTime,   setOpponentTime]   = useState(null)
-  const [currentTurnId,  setCurrentTurnId]  = useState(null)
-
-  const [thinkingSecondsLeft, setThinkingSecondsLeft] = useState(null)
-  const thinkingIntervalRef = useRef(null)
+  const pollRef             = useRef(null)
   const turnIntervalRef     = useRef(null)
-  useEffect(() => {
-    if (!debateId || !userId) return
+  const thinkingIntervalRef = useRef(null)
+  const userIdRef           = useRef(userId)
+  const currentTurnRef      = useRef(null)
+  const challengerIdRef     = useRef(null)
+  const lastMessageCountRef = useRef(0)
 
-    const connect = async () => {
-      const token = await getFreshToken()
-      if (!token) {
-        setError('Not logged in. Please log in again.')
-        return
+  useEffect(() => { userIdRef.current = userId }, [userId])
+
+  const [debate,              setDebate]              = useState(null)
+  const [messages,            setMessages]            = useState([])
+  const [connected,           setConnected]           = useState(false)
+  const [error,               setError]               = useState('')
+  const [challengerTime,      setChallengerTime]      = useState(null)
+  const [opponentTime,        setOpponentTime]        = useState(null)
+  const [currentTurnId,       setCurrentTurnId]       = useState(null)
+  const [thinkingSecondsLeft, setThinkingSecondsLeft] = useState(null)
+  const [isMyTurn,            setIsMyTurn]            = useState(false)
+
+  const startTurnTick = useCallback((currentTurn, cTime, oTime) => {
+    clearInterval(turnIntervalRef.current)
+    currentTurnRef.current = currentTurn
+
+    let cRemaining = cTime ?? 0
+    let oRemaining = oTime ?? 0
+
+    turnIntervalRef.current = setInterval(() => {
+      const turn    = currentTurnRef.current
+      const challId = challengerIdRef.current
+      if (turn === null) return
+
+      if (String(turn) === String(challId)) {
+        cRemaining = Math.max(0, cRemaining - 1)
+        setChallengerTime(cRemaining)
+      } else {
+        oRemaining = Math.max(0, oRemaining - 1)
+        setOpponentTime(oRemaining)
       }
-
-      const ws = new WebSocket(`${WS_BASE}/ws/debate/${debateId}/?token=${token}`)
-      socketRef.current = ws
-
-      ws.onopen = () => {
-        setConnected(true)
-        setError('')
-      }
-
-      ws.onclose = (event) => {
-        setConnected(false)
-        if (event.code === 4001) setError('Session expired. Please log in again.')
-        else if (event.code === 4003) setError('You are not a participant in this debate.')
-        else if (event.code !== 1000) setError('Connection lost. Please refresh.')
-      }
-
-      ws.onerror = () => {
-        setError('WebSocket error. Check that the server is running.')
-      }
-
-      ws.onmessage = (event) => {
-        handleMessage(JSON.parse(event.data))
-      }
-    }
-
-    connect()
-
-    return () => {
-      socketRef.current?.close(1000)
-      clearInterval(thinkingIntervalRef.current)
-      clearInterval(turnIntervalRef.current)
-    }
-  }, [debateId, userId])
-  const handleMessage = useCallback((data) => {
-    switch (data.type) {
-
-      case 'state_sync': {
-        const d = data.debate
-        setDebate(d)
-        setMessages(d.messages || [])
-        setChallengerTime(d.challenger_time_remaining)
-        setOpponentTime(d.opponent_time_remaining)
-        setCurrentTurnId(d.current_turn_user_id)
-        if (d.status === 'thinking' && d.thinking_started_at) {
-          startThinkingCountdown(d.thinking_seconds, d.thinking_started_at)
-        }
-        if (d.status === 'active') {
-          restartTurnTick(d.current_turn_user_id, d.challenger_time_remaining, d.opponent_time_remaining)
-        }
-        break
-      }
-
-      case 'thinking_started': {
-        setDebate(prev => prev ? { ...prev, status: 'thinking' } : prev)
-        startThinkingCountdown(data.thinking_seconds, data.thinking_started_at)
-        break
-      }
-
-      case 'debate_active': {
-        clearInterval(thinkingIntervalRef.current)
-        setThinkingSecondsLeft(null)
-        setCurrentTurnId(data.current_turn_user_id)
-        setChallengerTime(data.challenger_time_remaining)
-        setOpponentTime(data.opponent_time_remaining)
-        setDebate(prev => prev ? { ...prev, status: 'active' } : prev)
-        restartTurnTick(data.current_turn_user_id, data.challenger_time_remaining, data.opponent_time_remaining)
-        break
-      }
-
-      case 'new_message': {
-        setMessages(prev => [...prev, data.message])
-        setCurrentTurnId(data.current_turn_user_id)
-        setChallengerTime(data.challenger_time_remaining)
-        setOpponentTime(data.opponent_time_remaining)
-        restartTurnTick(data.current_turn_user_id, data.challenger_time_remaining, data.opponent_time_remaining)
-        break
-      }
-
-      case 'debate_ended': {
-        clearInterval(turnIntervalRef.current)
-        setDebate(prev => prev ? { ...prev, status: 'ended' } : prev)
-        break
-      }
-
-      case 'error': {
-        setError(data.message)
-        break
-      }
-
-      default:
-        break
-    }
+    }, 1000)
   }, [])
-  const startThinkingCountdown = (totalSeconds, startedAt) => {
+
+  const startThinkingCountdown = useCallback((totalSeconds, startedAt) => {
     clearInterval(thinkingIntervalRef.current)
     const endTime = new Date(startedAt).getTime() + totalSeconds * 1000
 
@@ -153,54 +57,112 @@ export function useDebateSocket(debateId, userId) {
       setThinkingSecondsLeft(remaining)
       if (remaining <= 0) {
         clearInterval(thinkingIntervalRef.current)
-        if (socketRef.current?.readyState === WebSocket.OPEN) {
-          socketRef.current.send(JSON.stringify({ type: 'thinking_done' }))
-        }
+        sendAction('thinking_done')
       }
     }
     tick()
     thinkingIntervalRef.current = setInterval(tick, 1000)
-  }
-  const restartTurnTick = (currentTurn, cTime, oTime) => {
-    clearInterval(turnIntervalRef.current)
-    let challengerRemaining = cTime
-    let opponentRemaining   = oTime
+  }, []) 
+  const applyDebateState = useCallback((d) => {
+    challengerIdRef.current = d.challenger?.id
+    currentTurnRef.current  = d.current_turn_user_id
 
-    turnIntervalRef.current = setInterval(() => {
-      if (currentTurn === null) return
-      if (String(currentTurn) === String(userId)) {
-        challengerRemaining = Math.max(0, challengerRemaining - 1)
-        setChallengerTime(challengerRemaining)
+    setDebate(d)
+    setMessages(d.messages || [])
+    lastMessageCountRef.current = (d.messages || []).length
+    setCurrentTurnId(d.current_turn_user_id)
+    setIsMyTurn(String(d.current_turn_user_id) === String(userIdRef.current))
+
+    let cTime = d.challenger_time_remaining
+    let oTime = d.opponent_time_remaining
+
+    if (d.status === 'active' && d.turn_started_at) {
+      const elapsed = (Date.now() - new Date(d.turn_started_at).getTime()) / 1000
+      if (String(d.current_turn_user_id) === String(d.challenger?.id)) {
+        cTime = Math.max(0, cTime - elapsed)
       } else {
-        opponentRemaining = Math.max(0, opponentRemaining - 1)
-        setOpponentTime(opponentRemaining)
+        oTime = Math.max(0, oTime - elapsed)
       }
-    }, 1000)
-  }
-  const sendMessage = useCallback((text) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      setError('Not connected. Please refresh.')
-      return
     }
-    socketRef.current.send(JSON.stringify({ type: 'send_message', text }))
+
+    setChallengerTime(cTime)
+    setOpponentTime(oTime)
+
+    if (d.status === 'thinking' && d.thinking_started_at) {
+      startThinkingCountdown(d.thinking_seconds, d.thinking_started_at)
+    }
+    if (d.status === 'active') {
+      startTurnTick(d.current_turn_user_id, cTime, oTime)
+    }
+    if (d.status === 'ended') {
+      clearInterval(turnIntervalRef.current)
+      clearInterval(thinkingIntervalRef.current)
+      stopPolling()
+    }
+  }, [startThinkingCountdown, startTurnTick])
+
+  const stopPolling = useCallback(() => {
+    clearInterval(pollRef.current)
   }, [])
 
-  const isMyTurn = String(currentTurnId) === String(userId)
-  const myTime   = debate?.challenger_id === userId ? challengerTime : opponentTime
-  const oppTime  = debate?.challenger_id === userId ? opponentTime   : challengerTime
+  const poll = useCallback(async () => {
+    if (!debateId) return
+    try {
+      const res = await api.get(`/debate/${debateId}/state/`)
+      setConnected(true)
+      setError('')
+      applyDebateState(res.data)
+    } catch (e) {
+      const code = e.response?.status
+      if (code === 401) setError('Session expired. Please log in again.')
+      else if (code === 403) setError('You are not a participant in this debate.')
+      else {
+        setConnected(false)
+        setError('Connection lost. Retrying...')
+      }
+    }
+  }, [debateId, applyDebateState])
+
+  useEffect(() => {
+    if (!debateId || !userId) return
+
+    userIdRef.current = userId
+
+    poll()
+    pollRef.current = setInterval(poll, POLL_INTERVAL)
+
+    return () => {
+      stopPolling()
+      clearInterval(turnIntervalRef.current)
+      clearInterval(thinkingIntervalRef.current)
+    }
+  }, [debateId, userId, poll, stopPolling])
+
+  const sendMessage = useCallback(async (text) => {
+    try {
+      await api.post(`/debate/${debateId}/message/`, { text })
+      await poll()
+    } catch (e) {
+      const msg = e.response?.data?.error || 'Failed to send message. Check your connection.'
+      setError(msg)
+    }
+  }, [debateId, poll])
+  const sendAction = useCallback(async (action, extra = {}) => {
+    try {
+      await api.post(`/debate/${debateId}/action/`, { action, ...extra })
+      await poll()
+    } catch (e) {
+      console.error('Action failed', e)
+    }
+  }, [debateId, poll])
+
+  const amIChallenger = String(challengerIdRef.current) === String(userId)
+  const myTime  = amIChallenger ? challengerTime : opponentTime
+  const oppTime = amIChallenger ? opponentTime   : challengerTime
 
   return {
-    debate,
-    messages,
-    connected,
-    error,
-    thinkingSecondsLeft,
-    challengerTime,
-    opponentTime,
-    currentTurnId,
-    isMyTurn,
-    myTime,
-    oppTime,
-    sendMessage,
+    debate, messages, connected, error,
+    thinkingSecondsLeft, challengerTime, opponentTime,
+    currentTurnId, isMyTurn, myTime, oppTime, sendMessage,
   }
 }

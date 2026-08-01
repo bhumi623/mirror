@@ -1,0 +1,569 @@
+.landing-page {
+  margin: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.hero {
+  background: #0F0A05;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.heroContent {
+  max-width: 720px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mirrorWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mirrorText {
+  font-family: MirrorFont, serif;
+  font-size: clamp(64px, 14vw, 140px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #F5F0E8;
+  margin: 0;
+  line-height: 1;
+}
+
+.reflectionWrap {
+  width: 100%;
+  overflow: hidden;
+  max-height: 0.55em;
+  margin-top: 4px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 90%);
+  --webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 90%);
+}
+
+.reflectionText {
+  transform: scaleY(-1);
+  color: #D4AF37;
+  opacity: 0.5;
+}
+
+.horizonLine {
+  width: clamp(120px, 24vw, 240px);
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(212,175,55,0.6), transparent);
+  margin-top: 2px;
+}
+
+.tagline {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(15px, 2.4vw, 19px);
+  font-weight: 600;
+  color: #D4AF37;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 32px 0 16px;
+}
+
+.subtext {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(14px, 1.8vw, 17px);
+  line-height: 1.7;
+  color: rgba(245,240,232,0.65);
+  max-width: 520px;
+  margin: 0 0 36px;
+}
+
+.ctaGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 56px;
+}
+
+.ctaRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btnPrimary {
+  background: #D4AF37;
+  color: #1a1000;
+  padding: 18px 40px;
+  border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btnOutline {
+  background: transparent;
+  color: #F5F0E8;
+  padding: 18px 40px;
+  border: 1.5px solid rgba(245,240,232,0.3);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.registerNudge {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(245,240,232,0.4);
+  margin: 0;
+}
+
+.registerLink {
+  color: #D4AF37;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.scrollHint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.scrollLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.35);
+}
+
+.scrollLine {
+  width: 1px;
+  height: 36px;
+  background: rgba(245,240,232,0.2);
+  animation: m-scroll-pulse 2s ease-in-out infinite;
+}
+
+.sectionInner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.sectionLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #8B7355;
+  margin-bottom: 12px;
+}
+
+.goldLine {
+  width: 36px;
+  height: 3px;
+  background: #D4AF37;
+  margin-bottom: 16px;
+}
+
+.sectionHeading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 900;
+  color: #1a1000;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  margin: 0 0 16px;
+}
+
+.sectionSub {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  color: #8B7355;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 0 40px;
+}
+
+.demoSection {
+  background: #F5F0E8;
+  padding: 96px 0;
+}
+
+.demoQuote {
+  background: white;
+  padding: 24px 28px;
+  border-left: 3px solid #D4AF37;
+  margin-bottom: 40px;
+}
+
+.demoQuoteText {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  color: #1a1000;
+  line-height: 1.8;
+  margin: 0 0 12px;
+  font-style: italic;
+}
+
+.demoQuoteMeta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.langBadge {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9B72CF;
+  letter-spacing: 1px;
+}
+
+.modeBadge {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8B7355;
+  letter-spacing: 1px;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2px;
+}
+
+.demoCard {
+  background: white;
+  padding: 24px 28px;
+}
+
+.dimLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8B7355;
+}
+
+.dimScore {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #1a1000;
+  letter-spacing: -1px;
+}
+
+.scoreBarBg {
+  height: 3px;
+  background: rgba(26,16,0,0.08);
+  margin-bottom: 14px;
+}
+
+.scoreBarFill {
+  height: 100%;
+  transition: width 0.8s ease;
+}
+
+.dimCardLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1000;
+  margin-bottom: 4px;
+}
+
+.dimDescription {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  color: #8B7355;
+  line-height: 1.6;
+}
+
+.debateSection {
+  background: #EDE8DE;
+  padding: 96px 0;
+}
+
+.debateArena {
+  background: #F5F0E8;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.debateTimerBar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.debateTimer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: white;
+  padding: 12px 16px;
+  flex: 1;
+}
+
+.debateTimerName {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8B7355;
+}
+
+.debateTimerVal {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: #1a1000;
+}
+
+.debateTopic {
+  padding: 12px 16px;
+  background: white;
+  border-left: 3px solid #D4AF37;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.debateTopicLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8B7355;
+}
+
+.debateTopicText {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1000;
+}
+
+.debateMessages {
+  display: flex;
+  flex-direction: column;
+}
+
+.scorecardPreview {
+  background: white;
+  padding: 28px;
+}
+
+.scorecardLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8B7355;
+  margin: 0 0 16px;
+}
+
+.scorecardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scorecardRow {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.scorecardDimLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8B7355;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.scorecardBars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.scorecardName {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  color: #8B7355;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.miniBarBg {
+  flex: 1;
+  height: 4px;
+  background: rgba(26,16,0,0.08);
+}
+
+.miniBarFill {
+  height: 100%;
+}
+
+.scorecardVal {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1000;
+  width: 24px;
+}
+
+.howSection {
+  background: white;
+  padding: 96px 0;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2px;
+}
+
+.stepCard {
+  background: #F5F0E8;
+  padding: 28px 24px;
+}
+
+.stepNum {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: #D4AF37;
+  letter-spacing: -2px;
+  margin-bottom: 12px;
+}
+
+.stepTitle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.stepBody {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  color: #8B7355;
+  line-height: 1.7;
+}
+
+.btnPrimaryDark {
+  background: #D4AF37;
+  color: #1a1000;
+  padding: 18px 48px;
+  border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: block;
+}
+
+.footer {
+  background: #0F0A05;
+  padding: 64px 24px;
+}
+
+.footerInner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.footerLogo {
+  font-family: MirrorFont, serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #F5F0E8;
+}
+
+.footerTagline {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(245,240,232,0.4);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.footerLink {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(245,240,232,0.5);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.footerDivider {
+  color: rgba(245,240,232,0.2);
+  font-size: 12px;
+}
+
+.footerNote {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  color: rgba(245,240,232,0.2);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+

@@ -1,7 +1,8 @@
 # backend/debate/scoring.py
 import httpx
-from decouple import config
-ML_SERVICE_URL = config('ML_SERVICE_URL', default='http://localhost:8001')
+from core.constants import ML_URL
+
+# Requests debate scores from the ML service and updates the debate record.
 def score_debate(debate) -> None:
     messages = []
     for msg in debate.messages:
@@ -9,10 +10,18 @@ def score_debate(debate) -> None:
         messages.append({'role': role, 'text': msg['text']})
     if len(messages) < 2:
         return 
+
+    fallback = {
+        'argument_strength': 50.0, 'logical_coherence': 50.0,
+        'rebuttal_quality':  50.0, 'clarity': 50.0,
+        'composure':         50.0, 'feedback': 'Scorecard delayed due to timeout.',
+    }
+    scores = {'challenger': fallback, 'opponent': fallback}
+
     try:
-        with httpx.Client(timeout=60.0) as client:
+        with httpx.Client(timeout=120.0) as client:
             response = client.post(
-                f"{ML_SERVICE_URL}/analyze-debate",
+                f"{ML_URL}/analyze-debate",
                 json={
                     'topic':    debate.topic,
                     'messages': messages,
@@ -20,19 +29,16 @@ def score_debate(debate) -> None:
             )
             response.raise_for_status()
             scores = response.json()
+            print(f"[scoring.py] Got scores: {scores}")
 
     except httpx.TimeoutException:
         print(f"[scoring.py] ML service timed out for debate {debate.id}")
-        return
     except httpx.ConnectError:
         print(f"[scoring.py] ML service unreachable for debate {debate.id}")
-        return
     except httpx.HTTPStatusError as e:
         print(f"[scoring.py] ML service error for debate {debate.id}: {e.response.text}")
-        return
     except Exception as e:
         print(f"[scoring.py] Unexpected error for debate {debate.id}: {e}")
-        return
 
     c = scores['challenger']
     debate.challenger_argument_strength = c['argument_strength']

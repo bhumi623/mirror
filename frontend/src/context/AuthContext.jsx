@@ -26,19 +26,19 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  // Saves auth tokens locally and fetches current user details.
+  const saveSession = async ({ access, refresh }) => {
+    localStorage.setItem('access_token', access)
+    localStorage.setItem('refresh_token', refresh)
+    const res = await api.get('/auth/me/')
+    setUser(res.data)
+  }
+
   const login = async (username, password) => {
-    const response = await api.post('/auth/login/', { username, password })
-    localStorage.setItem('access_token', response.data.access)
-    localStorage.setItem('refresh_token', response.data.refresh)
-    const userResponse = await api.get('/auth/me/')
-    setUser(userResponse.data)
+    const res = await api.post('/auth/login/', { username, password })
+    await saveSession(res.data)
   }
-  const googleLogin = async (tokenData) => {
-    localStorage.setItem('access_token', tokenData.access)
-    localStorage.setItem('refresh_token', tokenData.refresh)
-    const userResponse = await api.get('/auth/me/')
-    setUser(userResponse.data)
-  }
+  const googleLogin = (data) => saveSession(data)
 
   const logout = () => {
     localStorage.removeItem('access_token')

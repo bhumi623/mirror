@@ -1,31 +1,39 @@
 # backend/analysis/views.py
 
 import httpx
-from decouple import config
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from core.constants import ML_URL
 from .models import Analysis
 from .serializers import AnalysisSerializer, AnalysisListSerializer
 
-ML_SERVICE_URL = config('ML_SERVICE_URL', default='http://localhost:8001')
+import time
+import threading
 
+# Sends analysis text to our ML service endpoint.
 def call_ml_service(text: str, mode: str = 'self') -> dict:
-    try:
-        with httpx.Client(timeout=30.0) as client:
-            response = client.post(
-                f"{ML_SERVICE_URL}/analyze",
-                json={"text": text, "mode": mode},
-            )
-            response.raise_for_status()
-            return response.json()
-    except httpx.TimeoutException:
-        raise Exception("ML service timed out. Please try again.")
-    except httpx.ConnectError:
-        raise Exception("ML service is unavailable. Please try again later.")
-    except httpx.HTTPStatusError as e:
-        raise Exception(f"ML service error: {e.response.text}")
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with httpx.Client(timeout=120.0) as client:
+                response = client.post(
+                    f"{ML_URL}/analyze",
+                    json={"text": text, "mode": mode},
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code in [502, 503, 504] and attempt < max_retries - 1:
+                time.sleep(1.5)
+                continue
+            raise Exception(f"ML service error: {e.response.text}")
+        except (httpx.TimeoutException, httpx.ConnectError):
+            if attempt < max_retries - 1:
+                time.sleep(1.5)
+                continue
+            raise Exception("ML service is unavailable. Please try again later.")
 
 def ml_response_to_fields(ml_data: dict) -> dict:
     return {
@@ -130,3 +138,21 @@ def public_share(request, share_uuid):
         )
     serializer = AnalysisSerializer(analysis)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def wakeup_ml_service(request):
+    """
+    Fire-and-forget endpoint to ping the ML service /health 
+    so it boots up from sleep in the background.
+    """
+    def ping_ml():
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                client.get(f"{ML_URL}/health")
+        except Exception:
+            pass
+
+    threading.Thread(target=ping_ml, daemon=True).start()
+    return Response({"status": "wakeup_initiated"}, status=status.HTTP_200_OK)

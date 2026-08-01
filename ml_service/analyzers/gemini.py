@@ -4,7 +4,7 @@ import asyncio
 from decouple import config
 from groq import Groq
 
-_client = Groq(api_key=config('GROQ_API_KEY'))
+_client = Groq(api_key=config('GROQ_API_KEY'), max_retries=0, timeout=5.0)
 _MODEL  = 'llama-3.1-8b-instant'
 
 MODE_DIMENSIONS = {
@@ -77,13 +77,12 @@ NLP analysis scores (0-100):
 Score guide: 0-30 very low, 30-50 below average, 50-70 above average, 70-100 very high.
 
 For each dimension write:
-1. "label" — 3-6 words, fun and specific, ONE emoji. Like a personality quiz result. If language is hindi, write the label in simple hindi and not english. SIMPLE.
-2. "description" — exactly 2 sentences. Match the mode tone. No jargon. If language is hindi, write the description in simple hindi and not english. SIMPLE.
-
-{"If language is hi or hinglish, add Hindi/Hinglish warmth in descriptions." if language in ['hi', 'hinglish'] else ""}
+1. "reasoning" — 1 short sentence explaining why you chose this label based on the score and text.
+2. "label" — 3-6 words, fun and specific, ONE emoji. Like a personality quiz result. If language is hindi or hinglish, use very simple, everyday conversational words. DO NOT use complex, poetic, or formal Hindi.
+3. "description" — exactly 2 sentences. Match the mode tone. No jargon. If language is hindi or hinglish, use very simple, everyday conversational words. DO NOT use complex, poetic, or formal Hindi.
 
 Respond ONLY with valid JSON, no markdown, no extra text:
-{{"vibe":{{"label":"...","description":"..."}},"mood":{{"label":"...","description":"..."}},"inner_critic":{{"label":"...","description":"..."}},"mind":{{"label":"...","description":"..."}},"word_power":{{"label":"...","description":"..."}},"voice":{{"label":"...","description":"..."}}}}"""
+{{"vibe":{{"reasoning":"...","label":"...","description":"..."}},"mood":{{"reasoning":"...","label":"...","description":"..."}},"inner_critic":{{"reasoning":"...","label":"...","description":"..."}},"mind":{{"reasoning":"...","label":"...","description":"..."}},"word_power":{{"reasoning":"...","label":"...","description":"..."}},"voice":{{"reasoning":"...","label":"...","description":"..."}}}}"""
 
 async def generate_labels(text: str, scores: dict, language: str, mode: str = 'self') -> dict:
     try:

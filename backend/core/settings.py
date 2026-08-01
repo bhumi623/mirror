@@ -13,10 +13,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+import os
+from core.constants import API_HOST, APP_URL, SITE_URL, DEV_HOSTS, DEV_ORIGINS
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -26,7 +28,9 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Allowed domain hosts and CSRF trusted origins.
+ALLOWED_HOSTS = [API_HOST] + DEV_HOSTS
+CSRF_TRUSTED_ORIGINS = [SITE_URL, APP_URL] + DEV_ORIGINS
 
 
 # Application definition
@@ -77,10 +81,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
-CORS_ALLOWED_ORIGINS=[
-    'http://localhost:5173',
+CORS_ALLOWED_ORIGINS = [APP_URL] + DEV_ORIGINS
+CORS_ALLOWED_ORIGIN_REGEX_WHITELIST = [
+    r"^https://.*\.vercel\.app$",
 ]
-
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
@@ -118,15 +122,15 @@ DATABASES = {
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
+        'PORT': config('DB_PORT', cast=int, default=5432),
+        'OPTIONS': {
+            'sslmode': config('DB_SSLMODE', default='prefer'),
+        },
     }
 }
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
-        },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
 
@@ -184,3 +188,6 @@ REST_AUTH = {
 }
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+# Fix Google OAuth popup block caused by aggressive Django 5.x COOP defaults
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'

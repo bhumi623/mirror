@@ -26,6 +26,7 @@ def register_view(request):
 def profile_view(request):
     user = request.user
     return Response({
+        'id': user.id,
         'username': user.username,
         'email': user.email,
         'name': user.name,
@@ -33,7 +34,23 @@ def profile_view(request):
         'is_public': user.is_public,
         'bio': user.bio,
     })
+# Tolerates minor clock drift and logs detailed token validation errors.
+class TolerantGoogleAdapter(GoogleOAuth2Adapter):
+    def _decode_id_token(self, app, id_token):
+        import jwt
+        orig_decode = jwt.decode
+        jwt.decode = lambda *a, **k: orig_decode(*a, **{**k, 'leeway': 600})
+        try:
+            return super()._decode_id_token(app, id_token)
+        except Exception as err:
+            print(f"[Google OAuth Error] Token verification failed: {repr(err)}")
+            if hasattr(err, '__cause__') and err.__cause__:
+                print(f"[Google OAuth Root Cause]: {repr(err.__cause__)}")
+            raise err
+        finally:
+            jwt.decode = orig_decode
+
 class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
+    adapter_class = TolerantGoogleAdapter
     callback_url = 'postmessage'
     client_class = OAuth2Client
